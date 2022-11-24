@@ -1,0 +1,29 @@
+.nav-icon{
+    color:white;
+    font-weight:bold;
+    font-size:22px;
+}
+@media (max-width:480px){
+    #nav-con{
+        position:fixed;
+        left:0;
+        width:100vw;
+        bottom:0;
+        height:60px;
+        flex-direction: row;
+        border-radius:0;
+        transform:translateY(var(--transform));
+        transition:all 0.5s ease;
+        /* transform:translateY(80px) */
+    
+    }
+    #LogoCon{
+        display:none;
+    }
+    .nav-icon{
+        color:white;
+        font-weight:bold;
+        font-size:18px;
+        
+    }
+}
