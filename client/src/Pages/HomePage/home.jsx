@@ -9,6 +9,8 @@ import { FaChevronDown,FaChevronRight } from 'react-icons/fa';
 import {useEffect,useRef, useState} from 'react';
 import offlineData from '../../assets/assetData'
 import steveAvatar from './steve.jpg';
+import { useSelector } from 'react-redux'
+import  {selectUser} from '../../redux/userSlice'
 // import {mobile} from '../../responsive';
 
 import './home.css';
@@ -100,7 +102,6 @@ background-color: rgb(189, 250, 250,0.7);
 height:40px;
 display:flex;
 justify-content:center;
-width:150px;
 align-items:center;
 color:rgb(255,255,255);
 font-weight:300;
@@ -215,6 +216,7 @@ margin: 0;
 
 const Home=()=>{
     const  [fetched_data,setFetchedData]=useState([]);
+    const user=useSelector(selectUser);
     const  inp1=useRef(null)
     const  inp2=useRef(null)
     const  inp3=useRef(null)
@@ -287,15 +289,17 @@ const detailData=[{icon:MdOutlineLocationOn, text:"Places" ,id:"option01",inp:in
             </CenterLeftOthers>
                 </CenterConLeft>
                 <CenterConRight>
-                    <UserBtn id='user-btn'>
-                        <div style={{display:"flex",gap:'2px',alignItems:"center"}}>
-
-                        <Avatar src={steveAvatar} />
-
-                        Hello Steve
-                        </div>
-                        <FaChevronDown/>
+                {
+                     user&&<UserBtn id='user-btn'>
+                    <div style={{display:"flex",gap:'2px',alignItems:"center"}}>
+                    
+                    <Avatar src={steveAvatar} />
+                    
+                    Hello {user.userName}
+                    </div>
+                    <FaChevronDown/>
                     </UserBtn>
+                }    
                     <CenterConRightMid>
                         <Intro>
                             Live as if

@@ -22,7 +22,7 @@ const start=async()=>{
         console.log('datatbase was connected successfully')
         App.listen(5000,()=>{console.log('server is listening on port 5000')})
     } catch (error) {
-        console.log(error)
+        console.log(error.message)
         App.listen(5000,()=>{console.log('server is listening on port 5000')})
 
     }
