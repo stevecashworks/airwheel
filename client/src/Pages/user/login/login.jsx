@@ -2,11 +2,12 @@ import { useEffect, useRef } from 'react'
 import styled from 'styled-components'
 import { addError, clearErrors, selectError,selectIsLoading,setIsLoading } from '../../../redux/userSlice';
 import { useDispatch, useSelector } from 'react-redux';
-import { selectUser,setUser } from '../../../redux/userSlice';
-import { Navigate } from 'react-router-dom';
+import { selectUser,setUser,selectIsVisible,setIsVisible } from '../../../redux/userSlice';
+import { useNavigate } from 'react-router-dom';
+import {FaRegEye,FaRegEyeSlash} from 'react-icons/fa';
 import './login.css'
-import { ErrorsCon ,ErrorDetails} from '../register/register';
- export const  LoginContainer=styled.div`
+import { ErrorsCon ,ErrorDetails,PassWordWrapper} from '../register/register';
+ export const  LoginContainer=styled.form`
  margin:100px auto;
  width:300px;
  min-height:400px;
@@ -14,9 +15,9 @@ import { ErrorsCon ,ErrorDetails} from '../register/register';
  padding:30px;
  display:flex;
  flex-direction: column;
- gap:30px;
+ gap:20px;
  align-items:center;
- 
+  
 
 
  `
@@ -67,19 +68,21 @@ const Loading=styled.div`
 
  
 const Login=()=>{
+   const navigate=useNavigate()
 
    const dispatch=useDispatch();
 const errors=useSelector(selectError)
 const isLoading=useSelector(selectIsLoading)
+const IsVisible=useSelector(selectIsVisible)
 const user=useSelector(selectUser)
-
-
+const EyeIcon =IsVisible?FaRegEye:FaRegEyeSlash
 useEffect(()=>{
       
    dispatch(clearErrors())
 },[])
 
-const loginUser=async(id,pass)=>{
+const loginUser=async(e,id,pass)=>{
+   e.preventDefault()
    dispatch(clearErrors());
    dispatch(setIsLoading(true));
 
@@ -101,6 +104,8 @@ if(!data.success){
 }
 else{
 dispatch(setUser(data.message));
+console.log(data.message)
+navigate('/')
 
 }
 })
@@ -109,15 +114,20 @@ dispatch(setUser(data.message));
 }
 const emailRef=useRef(null)
     const passwordRef=useRef(null)
- if(!user){
+ 
 
     return(
        
        
-       <LoginContainer>
+       <LoginContainer onSubmit={(e)=>{loginUser(e,emailRef.current.value,passwordRef.current.value)}}>
       <h1>Login</h1>
-      <Inp ref={emailRef} placeholder='input your username or email' />
-    <Inp ref={passwordRef} type="password" placeholder='input your password' />
+
+      <Inp ref={emailRef} required placeholder='input your username or email' />
+    <PassWordWrapper>
+
+    <Inp ref={passwordRef} required style={{border:'none',outline:"none  "}} type={IsVisible?'text':'password'} placeholder='input your password' />
+    <EyeIcon onClick={()=>{dispatch(setIsVisible(!IsVisible))}}/>
+        </PassWordWrapper>
 {isLoading&&<Loading>Loading <span className="bouncing">...</span></Loading>}
 <ErrorsCon>
 {errors.map(err=>{
@@ -128,15 +138,11 @@ const emailRef=useRef(null)
          )
       })}
       </ErrorsCon>
-      <Btn onClick={()=>{loginUser(emailRef.current.value,passwordRef.current.value)}}>Login</Btn>
+      <Btn type="submit" >Login</Btn>
       
       </LoginContainer>    
    
    )
-}else{
-   return(
-      <Navigate to='/'/>
-   )
-}
+
 }
 export default Login

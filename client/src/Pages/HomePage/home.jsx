@@ -5,12 +5,12 @@ import { MdOutlineSearch } from 'react-icons/md'
 import {MdOutlineLocationOn} from 'react-icons/md'
 import {BsCalendarDate} from 'react-icons/bs'
 import { GiBabyfootPlayers } from 'react-icons/gi'
-import { FaChevronDown,FaChevronRight } from 'react-icons/fa';
+import { FaChevronDown,FaChevronRight, FaTable } from 'react-icons/fa';
 import {useEffect,useRef, useState} from 'react';
 import offlineData from '../../assets/assetData'
 import steveAvatar from './steve.jpg';
-import { useSelector } from 'react-redux'
-import  {selectUser} from '../../redux/userSlice'
+import { useDispatch, useSelector } from 'react-redux'
+import  {selectUser, setUser} from '../../redux/userSlice'
 // import {mobile} from '../../responsive';
 
 import './home.css';
@@ -209,7 +209,11 @@ font-weight:900;
 font-size:50px;
 color:white;
 margin: 0;
-
+@media (max-width:500px){
+    color:pink;
+    font-size:20px;
+    letter-spacing:1px;
+}
     
 
 `
@@ -217,6 +221,7 @@ margin: 0;
 const Home=()=>{
     const  [fetched_data,setFetchedData]=useState([]);
     const user=useSelector(selectUser);
+    const dispatch=useDispatch()
     const  inp1=useRef(null)
     const  inp2=useRef(null)
     const  inp3=useRef(null)
@@ -224,16 +229,36 @@ const detailData=[{icon:MdOutlineLocationOn, text:"Places" ,id:"option01",inp:in
 
     console.log(fetched_data)
 
-    const fetchData=async()=>{
+    const fetchPlacesData=async()=>{
          await fetch("http://localhost:5000/api/v1/places").then(response=>response.json()).then(data=>setFetchedData(data[0].Hotels)).catch((err)=>{
             console.log(err);
             setFetchedData(offlineData)
          })
     }
+    const fetchUserData=async()=>{
+        const token=localStorage.getItem('airwheel');
+        
+        if(token){
+             await fetch(`http://localhost:5000/api/v1/user/getbytk/${token}`).then(response=>response.json()).then(data=>{
+                if(data.success){
+                    dispatch(setUser(data.message))
+                }
+                }
+                ).catch((err)=>{
+          console.log(err);
+        
+         })
+        }
+        
+   }
     const inputRef=useRef(null);
     
+    const fetchHomeData=async()=>{
+        await fetchUserData();
+        fetchPlacesData()
+    }
    useEffect(()=>{
-    fetchData()
+    fetchHomeData()
    },[])
  return(
     
@@ -295,7 +320,7 @@ const detailData=[{icon:MdOutlineLocationOn, text:"Places" ,id:"option01",inp:in
                     
                     <Avatar src={steveAvatar} />
                     
-                    Hello {user.userName}
+                    Hello <p style={{textTransform:'capitalize'}}>{user.userName||user.name}</p>
                     </div>
                     <FaChevronDown/>
                     </UserBtn>

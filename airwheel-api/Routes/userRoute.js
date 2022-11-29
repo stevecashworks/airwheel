@@ -45,7 +45,7 @@ require('dotenv').config()
      if(isCorrect){
       const token=JWT.sign(user,process.env.JWT);
       
-     return res.status(200).cookie('access_token',token,{httpOnly:true}).json({success:true,message:user})
+     return res.status(200).cookie('access_token',token,{httpOnly:true}).json({success:true,message:{...user,token}})
      }
      else{
       return res.status(403).json({success:false,message:'incorrect password'})
@@ -87,17 +87,26 @@ require('dotenv').config()
  //register
 
  userRouter.post('/register',async(req,res)=>{
-  const newUser= new userSchema;
-   bcrypt.genSalt(10,async(err,hash)=>{
-      try {
-         const newUser= new userSchema({...req.body,password:hash });
-       const savedUser=  await newUser.save();
-       return res.status(200).json(savedUser)
-      } catch (error) {
-          console.log(error);
-          res.status(403).json(error.message)
-      }
-   })
+  
+  bcrypt.hash(req.body.password,10,async(err,hash)=>{
+    if(err){
+      console.log(err)
+    }
+    else{
+   const userData= new userSchema({...req.body,password:hash});
+       
+   try{const savedUser=await userData.save();
+       const token=JWT.sign({id:savedUser._id},process.env.JWT);
+        const {password,...otherDetails}=savedUser._doc;
+        res.status(201).json({success:true,message:{...otherDetails,token}})
+        
+
+    } catch(err){
+      res.status(401).json({success:false,message:err.message});
+
+    }
+  }
+  })
 
 
  })
@@ -110,4 +119,22 @@ userRouter.put('/edit',verifyToken,(req,res)=>{
    
 }
 ) 
+//get by token;
+userRouter.get('/getbytk/:tk',(req,res)=>{
+   const tk=req.params.tk;
+    JWT.verify(tk,process.env.JWT,async(err,data)=>{
+      if(err){
+        console.log(err)
+       return res.status(403).json({success:false,message:"failed to authenticate user"})
+      }else{
+         try {
+          const thisUser=await userSchema.findById(data.id);
+          const {password,...others}=thisUser._doc
+       return   res.status(200).json({success:true,message:others})
+         } catch (error) {
+           res.status(404).json({success:false,message:error.message})
+         }
+      }
+    })
+})
  module.exports=userRouter
